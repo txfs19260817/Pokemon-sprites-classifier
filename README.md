@@ -6,11 +6,13 @@ A PyTorch implemented Pokémon dot sprites classifier.
 .
 ├── README.md
 ├── dataset  # The training/validating data
+├── utils  # a Python package providing helper functions
 ├── label.csv  # Currently supported species, used for inference
+├── labeling_tool.py  # A labeling tool helps crop a rental team screenshot
 ├── model.py  # Classification CNNs with modified last layer
 ├── onnx_export.py  # Export a PyTorch model to ONNX format and verify it
 ├── requirements.txt  # Python package requirements
-├── service.py  # Flask built inference service
+├── service.py  # Flask-based inference service
 ├── test.py  # Single image test script
 └── train.py  # Model training script
 ```

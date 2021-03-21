@@ -2,7 +2,6 @@ import argparse
 import io
 import logging
 
-import numpy as np
 import torch
 from PIL import Image
 from flask import Flask, jsonify, request
