@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 
+# generate dataset from individual images for torchvision.datasets.ImageFolder
 def generate_dataset(root):
     image_paths = os.listdir(root)
     images = [i for i in image_paths if '.png' in i]
