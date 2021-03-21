@@ -2,10 +2,11 @@ import os
 import torch
 import torch.nn as nn
 import torchvision
-from model import training_model
 from tqdm import tqdm
-from transformation import transform
 
+import utils
+from model import training_model
+from transformation import transform
 
 batch_size = 32
 num_workers = 2
@@ -20,6 +21,7 @@ def train(dataset_root_path, model_name):
     trainset, valset = torch.utils.data.random_split(dataset, [dataset.__len__() - val_amount, val_amount])
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     valloader = torch.utils.data.DataLoader(valset, batch_size=1, shuffle=False, num_workers=1)
+
     classes = dataset.classes
     iters = len(trainloader)
 
@@ -27,7 +29,7 @@ def train(dataset_root_path, model_name):
 
     model = training_model(model_name, len(classes), pretrained=True)
     model = model.to(device)
-    weight_path = model_name+'.pth'
+    weight_path = model_name + '.pth'
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
@@ -53,14 +55,15 @@ def train(dataset_root_path, model_name):
             # print statistics
             running_loss += loss.item()
 
-        pbar.set_description('loss: %.5f, lr = %.5f' %
-                             (running_loss, optimizer.param_groups[0]['lr']))
+        pbar.set_description('loss: %.5f, lr = %.5f' % (running_loss, optimizer.param_groups[0]['lr']))
         pbar.refresh()  # to show immediately the update
-        if ei % (epochs//10) == epochs//10-1:
+        if ei % (epochs // 10) == epochs // 10 - 1:
             validation(valloader, model, device, classes)
 
     torch.save(model.state_dict(), weight_path)
     print('Finished training, and weight was saved in ' + weight_path)
+    utils.generate_label_csv(classes)
+    print('Generated label.csv')
 
 
 def validation(testloader, model, device, classes):
