@@ -9,10 +9,10 @@ A PyTorch implemented Pokémon dot sprites classifier.
 ├── label.csv  # Currently supported species, used for inference
 ├── model.py  # Classification CNNs with modified last layer
 ├── onnx_export.py  # Export a PyTorch model to ONNX format and verify it
+├── requirements.txt  # Python package requirements
+├── service.py  # Flask built inference service
 ├── test.py  # Single image test script
-├── train.py  # Model training script
-├── transformation.py  # torchvision.transform methods for train and test
-└── utils.py
+└── train.py  # Model training script
 ```
 
 ## Requirements

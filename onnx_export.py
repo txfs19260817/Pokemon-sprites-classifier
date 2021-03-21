@@ -5,9 +5,9 @@ import torch
 import torch.onnx
 from PIL import Image
 
-from model import training_model
-from transformation import transform
-from utils import label_csv2dict
+from utils.model import training_model
+from utils.transformation import transform
+from utils.labeling import label_csv2dict
 
 
 def torch2onnx(model_name, image_path):

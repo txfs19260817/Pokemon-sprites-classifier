@@ -16,6 +16,6 @@ transform = {
         transforms.Resize(size),
         # transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        # transforms.Normalize(mean=mean, std=std)
-    ])
+        transforms.Normalize(mean=mean, std=std)
+    ]),
 }

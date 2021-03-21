@@ -5,10 +5,9 @@ import torch.nn as nn
 import torchvision
 from tqdm import tqdm
 
-import utils
-from model import training_model, supported_models
-from transformation import transform
-
+from utils.model import training_model, supported_models
+from utils.transformation import transform
+from utils.labeling import generate_label_csv
 
 def train(args):
     train_path, val_path = os.path.join(args.dataset_root_path, "train"), os.path.join(args.dataset_root_path, "test")
@@ -59,7 +58,7 @@ def train(args):
 
     torch.save(model.state_dict(), weight_path)
     print('Finished training, and weight was saved in ' + weight_path)
-    utils.generate_label_csv(classes)
+    generate_label_csv(classes)
     print('Generated label.csv')
 
 
@@ -97,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
                         choices=supported_models,
                         help='model architecture: ' +
-                            ' | '.join(supported_models) +
-                            ' (default: mobilenetv2)')
+                             ' | '.join(supported_models) +
+                             ' (default: mobilenetv2)')
     args = parser.parse_args()
     train(args)

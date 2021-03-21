@@ -5,3 +5,4 @@ Pillow
 onnx
 onnxruntime
 tqdm
+flask~=1.1.2

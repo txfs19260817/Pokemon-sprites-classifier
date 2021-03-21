@@ -4,8 +4,8 @@ import torch
 import torchvision
 from PIL import Image
 
-from model import training_model, supported_models
-from transformation import transform
+from utils.model import training_model, supported_models
+from utils.transformation import transform
 
 
 def test(args):
@@ -19,8 +19,8 @@ def test(args):
 
     model = training_model(args.arch, len(classes), pretrained=True)
     model = model.to(device)
-    model.eval()
     model.load_state_dict(torch.load(weight_path))
+    model.eval()
 
     for image_path in args.filenames:
         img = Image.open(image_path)
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
                         choices=supported_models,
                         help='model architecture: ' +
-                            ' | '.join(supported_models) +
-                            ' (default: mobilenetv2)')
+                             ' | '.join(supported_models) +
+                             ' (default: mobilenetv2)')
     args = parser.parse_args()
     test(args)
 
