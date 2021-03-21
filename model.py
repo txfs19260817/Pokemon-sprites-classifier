@@ -2,6 +2,13 @@ import torch.nn as nn
 from torchvision import models
 
 
+supported_models = [
+    "alexnet",
+    "mobilenetv2",
+    "resnet18"
+]
+
+
 def training_model(model_name, num_classes, pretrained=True):
     if 'alex' in model_name.lower():
         return alexnet(num_classes, pretrained)

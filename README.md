@@ -1,5 +1,5 @@
 # Pokémon-sprites-classifier
-A PyTorch implemented Pokémon sprites classifier.
+A PyTorch implemented Pokémon dot sprites classifier.
 
 ## Structure
 ```
@@ -24,7 +24,47 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-TODO
+### Train
+Run `python train.py -h` for help.
+```
+usage: train.py [-h] [-d DIR] [-b N] [-e N] [-w N] [--lr LR] [-a ARCH]
+
+Train a Pokemon species classifier.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d DIR, --dataset-root-path DIR
+                        root path to dataset (default: ./dataset)
+  -b N, --batch-size N  input batch size for training (default: 32)
+  -e N, --epochs N      number of epochs to train (default: 200)
+  -j N, --num-workers N
+                        number of workers to sample data (default: 2)
+  --lr LR, --learning-rate LR
+                        initial learning rate (default: 0.0001)
+  -a ARCH, --arch ARCH  model architecture: alexnet | mobilenetv2 | resnet18
+                        (default: mobilenetv2)
+```
+### Test
+Run `python test.py -h` for help.
+```
+usage: test.py [-h] [-d DIR] [-a ARCH] FILE [FILE ...]
+
+Test the trained Pokemon species classifier.
+
+positional arguments:
+  FILE                  images to be tested
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d DIR, --dataset-root-path DIR
+                        root path to dataset (default: ./dataset)
+  -a ARCH, --arch ARCH  model architecture: alexnet | mobilenetv2 | resnet18
+                        (default: mobilenetv2)
+```
+Example:
+```
+python test.py 1.png 2.png 3.png
+```
 
 ## Supported Species
 Only Pokémon listed in `label.csv` can be recognized by models.

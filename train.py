@@ -1,3 +1,4 @@
+import argparse
 import os
 import torch
 import torch.nn as nn
@@ -5,37 +6,33 @@ import torchvision
 from tqdm import tqdm
 
 import utils
-from model import training_model
+from model import training_model, supported_models
 from transformation import transform
 
-batch_size = 32
-num_workers = 2
-epochs = 200
 
-
-def train(dataset_root_path, model_name):
-    train_path, val_path = os.path.join(dataset_root_path, "train"), os.path.join(dataset_root_path, "test")
+def train(args):
+    train_path, val_path = os.path.join(args.dataset_root_path, "train"), os.path.join(args.dataset_root_path, "test")
     dataset = torchvision.datasets.ImageFolder(root=train_path, transform=transform['train'])
     val_percent = 0.05
     val_amount = int(dataset.__len__() * val_percent)
     trainset, valset = torch.utils.data.random_split(dataset, [dataset.__len__() - val_amount, val_amount])
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    valloader = torch.utils.data.DataLoader(valset, batch_size=1, shuffle=False, num_workers=1)
+    trainloader = torch.utils.data.DataLoader(trainset, args.batch_size, shuffle=True, num_workers=args.num_workers)
+    valloader = torch.utils.data.DataLoader(valset, 1, shuffle=False, num_workers=1)
 
     classes = dataset.classes
     iters = len(trainloader)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    weight_path = args.arch + '.pth'
 
-    model = training_model(model_name, len(classes), pretrained=True)
+    model = training_model(args.arch, len(classes), pretrained=True)
     model = model.to(device)
-    weight_path = model_name + '.pth'
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, epochs)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, args.epochs)
 
-    pbar = tqdm(range(epochs))
+    pbar = tqdm(range(args.epochs))
     for ei, epoch in enumerate(pbar):  # loop over the dataset multiple times
         running_loss = 0.0
         model.train()
@@ -52,12 +49,12 @@ def train(dataset_root_path, model_name):
             optimizer.step()
             scheduler.step(epoch + i / iters)
 
-            # print statistics
+            # stat
             running_loss += loss.item()
 
         pbar.set_description('loss: %.5f, lr = %.5f' % (running_loss, optimizer.param_groups[0]['lr']))
         pbar.refresh()  # to show immediately the update
-        if ei % (epochs // 10) == epochs // 10 - 1:
+        if ei % (args.epochs // 10) == args.epochs // 10 - 1:
             validation(valloader, model, device, classes)
 
     torch.save(model.state_dict(), weight_path)
@@ -86,4 +83,21 @@ def validation(testloader, model, device, classes):
 
 
 if __name__ == '__main__':
-    train('dataset', 'mobilenetv2')
+    parser = argparse.ArgumentParser(description='Train a Pokemon species classifier.')
+    parser.add_argument('-d', '--dataset-root-path', metavar='DIR',
+                        help='root path to dataset (default: ./dataset)', default="dataset")
+    parser.add_argument('-b', '--batch-size', type=int, default=32, metavar='N',
+                        help='input batch size for training (default: 32)')
+    parser.add_argument('-e', '--epochs', type=int, default=200, metavar='N',
+                        help='number of epochs to train (default: 200)')
+    parser.add_argument('-j', '--num-workers', type=int, default=2, metavar='N',
+                        help='number of workers to sample data (default: 2)')
+    parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
+                        metavar='LR', help='initial learning rate (default: 0.0001)', dest='lr')
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
+                        choices=supported_models,
+                        help='model architecture: ' +
+                            ' | '.join(supported_models) +
+                            ' (default: mobilenetv2)')
+    args = parser.parse_args()
+    train(args)
