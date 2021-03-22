@@ -23,6 +23,6 @@ def generate_dataset(root):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate a dataset from individual images for '
                                                  'torchvision.datasets.ImageFolder.')
-    parser.add_argument('--root', metavar='DIR', type=str, help='path to labelled images')
+    parser.add_argument('--root', metavar='DIR', type=str, help='path to labelled images', default='train')
     args = parser.parse_args()
     generate_dataset(args.root)
