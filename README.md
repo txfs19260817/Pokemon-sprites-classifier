@@ -2,7 +2,7 @@
 A PyTorch implemented Pokémon dot sprites classifier.
 
 ## Structure
-```
+```text
 .
 ├── README.md
 ├── dataset  # The training/validating data
@@ -21,14 +21,14 @@ A PyTorch implemented Pokémon dot sprites classifier.
 * Python 3.7 or above (below are not tested)
 * [PyTorch](https://pytorch.org/get-started/locally/)
 * Dependencies in requirements.txt
-```
+```shell
 pip install -r requirements.txt
 ```
 
 ## Usage
 ### Train
 Run `python train.py -h` for help.
-```
+```text
 usage: train.py [-h] [-d DIR] [-b N] [-e N] [-w N] [--lr LR] [-a ARCH]
 
 Train a Pokemon species classifier.
@@ -48,7 +48,7 @@ optional arguments:
 ```
 ### Test
 Run `python test.py -h` for help.
-```
+```text
 usage: test.py [-h] [-d DIR] [-a ARCH] FILE [FILE ...]
 
 Test the trained Pokemon species classifier.
@@ -64,7 +64,7 @@ optional arguments:
                         (default: mobilenetv2)
 ```
 Example:
-```
+```shell
 python test.py 1.png 2.png 3.png
 ```
 
@@ -72,11 +72,36 @@ python test.py 1.png 2.png 3.png
 Only Pokémon listed in `label.csv` can be recognized by models.
 
 ## How to contribute
-TODO
 Please feel free to pull requests to help contribute to this project! Also, please help enlarge the dataset with the provided semi-automatic labeling tool.
 
+### Labeling Tool
+The provided labeling tool `labeling_tool.py` helps resize and crop a team preview screenshot and output 6 sprite thumbnails. Then users need to rename the cropped images with Pokémon name manually.
+
+Run `python labeling_tool.py -h` for help.
+```text
+usage: labeling_tool.py [-h] FILE [FILE ...]
+```
+Example:
+```shell
+python labeling_tool.py 1.png 2.png 3.png
+```
+Labeling procedures:
+1. Run the tool as shown in the example, and you will get 3*6=18 (If 3 images as in the example) thumbnails
+2. Rename them manually with their Pokémon English name in LOWER CASE and some random characters, connected with `-`. E.g. `pikachu-19260817.png`
+3. Move labelled images to the folder `dataset/train` and run `cd ./dataset && python data_gen.py`, then Pull Requests.
+
+**Notes**:
+* The input images should be SCREENSHOTS from Nintendo Switch or live-streaming tools (e.g. OBS) rather than photographs taken by a camera
+* Some names containing symbols need special dealing. The principle is to remove all symbols directly. Examples: 
+  * `tapu fini` -> `tapufini`
+  * `ho-oh` -> `hooh`
+  * `flabébé` -> `flabebe`
+  * `mr.mime` -> `mrmime`
+  * `farfetch'd` -> `farfetchd`
+
+
 ## Roadmap
-- [ ] Release a labeling tool
+- [x] Release a labeling tool
 - [ ] Release pre-trained models
 - [ ] Design and deploy an inference service
 - [ ] Model compression

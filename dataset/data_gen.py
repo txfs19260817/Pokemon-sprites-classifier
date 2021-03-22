@@ -1,9 +1,10 @@
+import argparse
 import os
 import shutil
 from pathlib import Path
 
 
-# generate dataset from individual images for torchvision.datasets.ImageFolder
+# generate a dataset from individual images for torchvision.datasets.ImageFolder
 def generate_dataset(root):
     image_paths = os.listdir(root)
     images = [i for i in image_paths if '.png' in i]
@@ -12,9 +13,16 @@ def generate_dataset(root):
     for n in names:
         Path(os.path.join(root, n)).mkdir(exist_ok=True)  # python 3.5 above
     for p in image_paths:
-        shutil.move(os.path.join(root, p), os.path.join(
-            root, p.split(".")[0].split("-")[0]))
+        dest = os.path.join(root, p.split(".")[0].split("-")[0])
+        if os.path.exists(dest):
+            shutil.move(os.path.join(root, p), dest)
+        else:
+            print("the destination " + dest + " does not exist, please check!")
 
 
 if __name__ == '__main__':
-    generate_dataset('train')
+    parser = argparse.ArgumentParser(description='Generate a dataset from individual images for '
+                                                 'torchvision.datasets.ImageFolder.')
+    parser.add_argument('--root', metavar='DIR', type=str, help='path to labelled images')
+    args = parser.parse_args()
+    generate_dataset(args.root)
