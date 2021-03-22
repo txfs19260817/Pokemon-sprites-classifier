@@ -14,7 +14,7 @@ def labeling(image_path):
 
 
 if __name__ == '__main__':
-    print("Please ensure that the input image(s) should be SCREENSHOT rather than photograph!")
+    print("[INFO] Please ensure that the input image(s) should be SCREENSHOT rather than photograph.")
     parser = argparse.ArgumentParser(description='A labeling tool helps resize and crop a team preview screenshot '
                                                  'and output 6 sprite thumbnails.')
     parser.add_argument('filenames', metavar='FILE', type=str, nargs='+', help='images to be processed')

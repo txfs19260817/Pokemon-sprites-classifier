@@ -1,24 +1,24 @@
 import argparse
 import os
+
 import torch
 import torch.nn as nn
 import torchvision
 from tqdm import tqdm
 
+from utils.labeling import generate_label_csv
 from utils.model import training_model, supported_models
 from utils.transformation import transform
-from utils.labeling import generate_label_csv
+
 
 def train(args):
     train_path, val_path = os.path.join(args.dataset_root_path, "train"), os.path.join(args.dataset_root_path, "test")
-    dataset = torchvision.datasets.ImageFolder(root=train_path, transform=transform['train'])
-    val_percent = 0.05
-    val_amount = int(dataset.__len__() * val_percent)
-    trainset, valset = torch.utils.data.random_split(dataset, [dataset.__len__() - val_amount, val_amount])
+    trainset = torchvision.datasets.ImageFolder(root=train_path, transform=transform['train'])
+    valset = torchvision.datasets.ImageFolder(root=val_path, transform=transform['test'])
     trainloader = torch.utils.data.DataLoader(trainset, args.batch_size, shuffle=True, num_workers=args.num_workers)
     valloader = torch.utils.data.DataLoader(valset, 1, shuffle=False, num_workers=1)
 
-    classes = dataset.classes
+    classes = trainset.classes
     iters = len(trainloader)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -78,7 +78,7 @@ def validation(testloader, model, device, classes):
             if classes[labels[0]] != classes[predicted[0]]:
                 print("expected: ", classes[labels[0]], "predicted: ", classes[predicted[0]])
 
-    print('Accuracy of the network on images: %d %%' % (100 * correct / total))
+    print('Accuracy of the network on images: %.2f %%' % (100 * correct / total))
 
 
 if __name__ == '__main__':
@@ -87,8 +87,8 @@ if __name__ == '__main__':
                         help='root path to dataset (default: ./dataset)', default="dataset")
     parser.add_argument('-b', '--batch-size', type=int, default=32, metavar='N',
                         help='input batch size for training (default: 32)')
-    parser.add_argument('-e', '--epochs', type=int, default=200, metavar='N',
-                        help='number of epochs to train (default: 200)')
+    parser.add_argument('-e', '--epochs', type=int, default=1000, metavar='N',
+                        help='number of epochs to train (default: 1000)')
     parser.add_argument('-j', '--num-workers', type=int, default=2, metavar='N',
                         help='number of workers to sample data (default: 2)')
     parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
