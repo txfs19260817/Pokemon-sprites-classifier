@@ -1,12 +1,11 @@
 import argparse
 import io
-import logging
 
 import torch
 from PIL import Image
 from flask import Flask, jsonify, request
 
-from utils.labeling import label_csv2dict
+from utils.labeling import label_csv2dict, resize_and_crop
 from utils.model import supported_models, training_model
 from utils.transformation import transform
 
@@ -23,7 +22,6 @@ args = parser.parse_args()
 
 # app settings
 app = Flask(__name__)
-logger = logging.getLogger(__name__)
 inference_types = ('single', 'team')
 
 # model settings
@@ -35,30 +33,10 @@ model = model.to(device)
 model.load_state_dict(torch.load(weight_path, map_location=device))
 model.eval()
 
-# crop parameters
-expected_size = (1280, 720)
-begin = (85, 20)
-box = (75, 75)
-offset_x, offset_y = 588, 186
-
-
-def resize_and_crop(image_bytes):
-    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    if image.width != 1280 and image.height != 720:
-        image = image.resize(expected_size)
-    crop_list = [
-        image.crop((begin[0], begin[1], begin[0] + box[0], begin[1] + box[1])),
-        image.crop((begin[0] + offset_x, begin[1], begin[0] + offset_x + box[0], begin[1] + box[1])),
-        image.crop((begin[0], begin[1] + offset_y, begin[0] + box[0], begin[1] + offset_y + box[1])),
-        image.crop((begin[0] + offset_x, begin[1] + offset_y, begin[0] + offset_x + box[0], begin[1] + offset_y + box[1])),
-        image.crop((begin[0], begin[1] + offset_y * 2, begin[0] + box[0], begin[1] + offset_y * 2 + box[1])),
-        image.crop((begin[0] + offset_x, begin[1] + offset_y * 2, begin[0] + offset_x + box[0], begin[1] + offset_y * 2 + box[1])),
-    ]
-    return crop_list
-
 
 def get_team_preview_prediction(image_bytes):
-    crop_list = resize_and_crop(image_bytes)
+    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    crop_list = resize_and_crop(image)
     tensor_list = [transform['test'](i) for i in crop_list]
     tensor = torch.stack(tensor_list)
     tensor = tensor.to(device)
@@ -66,7 +44,7 @@ def get_team_preview_prediction(image_bytes):
         outputs = model(tensor)
     _, predicted_indices = torch.max(outputs.data, 1)
     predicted_classes = [class_index[i.item()] for i in predicted_indices]
-    logger.info('Result: ' + ' '.join(predicted_classes))
+    app.logger.info('Result: ' + ' '.join(predicted_classes))
     return predicted_classes
 
 
@@ -78,7 +56,7 @@ def get_single_prediction(image_bytes):
         output = model(tensor)
     _, predicted_idx = torch.max(output.data, 1)
     predicted_class = class_index[predicted_idx.item()]
-    logger.info('Result: ' + predicted_class)
+    app.logger.info('Result: ' + predicted_class)
     return predicted_class
 
 

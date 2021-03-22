@@ -73,6 +73,7 @@ Only Pokémon listed in `label.csv` can be recognized by models.
 
 ## How to contribute
 TODO
+Please feel free to pull requests to help contribute to this project! Also, please help enlarge the dataset with the provided semi-automatic labeling tool.
 
 ## Roadmap
 - [ ] Release a labeling tool
@@ -86,5 +87,5 @@ TODO
 * [PokéSprite](https://github.com/msikma/pokesprite)
 
 ### Team Preview
-* [Scopelens](https://scopelens.team/)
+* [ScopeLens](https://scopelens.team/)
 
