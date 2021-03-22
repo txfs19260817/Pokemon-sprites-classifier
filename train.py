@@ -20,6 +20,7 @@ def train(args):
 
     classes = trainset.classes
     iters = len(trainloader)
+    max_acc = 0
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     weight_path = args.arch + '.pth'
@@ -54,7 +55,10 @@ def train(args):
         pbar.set_description('loss: %.5f, lr = %.5f' % (running_loss, optimizer.param_groups[0]['lr']))
         pbar.refresh()  # to show immediately the update
         if ei % (args.epochs // 10) == args.epochs // 10 - 1:
-            validation(valloader, model, device, classes)
+            acc = validation(valloader, model, device, classes)
+            if acc > max_acc:
+                max_acc = acc
+                torch.save(model.state_dict(), 'best_'+weight_path)
 
     torch.save(model.state_dict(), weight_path)
     print('Finished training, and weight was saved in ' + weight_path)
@@ -78,7 +82,9 @@ def validation(testloader, model, device, classes):
             if classes[labels[0]] != classes[predicted[0]]:
                 print("expected: ", classes[labels[0]], "predicted: ", classes[predicted[0]])
 
-    print('Accuracy of the network on images: %.2f %%' % (100 * correct / total))
+    acc = 100 * correct / total
+    print('Accuracy of the network on images: %.2f %%' % acc)
+    return acc
 
 
 if __name__ == '__main__':
