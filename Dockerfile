@@ -1,10 +1,8 @@
-FROM ubuntu:20.04
+FROM python:3.8-buster
 
 WORKDIR /usr/src/app
 
 # Install dependencies
-RUN apt-get update -y && \
-    apt-get install -y python3-pip build-essential libjpeg8-dev zlib1g-dev wget
 RUN pip3 install --upgrade pip
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
