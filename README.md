@@ -4,17 +4,18 @@ A PyTorch implemented Pokémon dot sprites classifier.
 ## Structure
 ```text
 .
+├── Dockerfile  # Inference service Dockerization
 ├── README.md
+├── app.py  # Flask-based inference service
+├── configs  # Configuration files for the inference service
 ├── dataset  # The training/validating data
-├── utils  # a Python package providing helper functions
-├── label.csv  # Currently supported species, used for inference
+│   └── label.csv  # Currently supported species, used for inference
 ├── labeling_tool.py  # A labeling tool helps crop a rental team screenshot
-├── model.py  # Classification CNNs with modified last layer
 ├── onnx_export.py  # Export a PyTorch model to ONNX format and verify it
 ├── requirements.txt  # Python package requirements
-├── service.py  # Flask-based inference service
 ├── test.py  # Single image test script
-└── train.py  # Model training script
+├── train.py  # Model training script
+└── utils  # a Python package providing helper functions
 ```
 
 ## Requirements
@@ -71,6 +72,9 @@ python test.py 1.png 2.png 3.png
 ## Supported Species
 Only Pokémon listed in `label.csv` can be recognized by models.
 
+## Pretrained models
+Please refer to the [release](https://github.com/txfs19260817/Pokemon-sprites-classifier/releases) page. Please download the weight files and move them under the root directory.
+
 ## How to contribute
 Please feel free to pull requests to help contribute to this project! Also, please help enlarge the dataset with the provided semi-automatic labeling tool.
 
@@ -88,7 +92,7 @@ python labeling_tool.py 1.png 2.png 3.png
 Labeling procedures:
 1. Run the tool as shown in the example, and you will get 3*6=18 (If 3 images as in the example) thumbnails
 2. Rename them manually with their Pokémon English name in LOWER CASE and some random characters, connected with `-`. E.g. `pikachu-19260817.png`
-3. Move labelled images to the folder `dataset/train` and run `cd ./dataset && python data_gen.py`, then Pull Requests.
+3. Move labelled images to the folder `dataset/train` and run `cd ./dataset && python data_gen.py`, then Pull Requests
 
 **Notes**:
 * The input images should be SCREENSHOTS from Nintendo Switch or live-streaming tools (e.g. OBS) rather than photographs taken by a camera
@@ -100,10 +104,13 @@ Labeling procedures:
   * `farfetch'd` -> `farfetchd`
 
 
+## Docker
+A Dockerfile is prepared for deploying inference service with gunicorn. Please check `configs` for configuration.
+
 ## Roadmap
 - [x] Release a labeling tool
-- [ ] Release pre-trained models
-- [ ] Design and deploy an inference service
+- [x] Release pre-trained models
+- [x] Design and deploy an inference service
 - [ ] Model compression
 
 ## Resources
