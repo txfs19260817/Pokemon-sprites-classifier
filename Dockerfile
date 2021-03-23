@@ -18,5 +18,5 @@ COPY dataset/label.csv dataset/label.csv
 COPY configs ./configs
 
 # Run
-EXPOSE 19810
+EXPOSE 14514
 CMD [ "gunicorn", "app:app", "-c", "./configs/gunicorn.conf.py"]

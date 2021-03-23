@@ -5,6 +5,8 @@ import logging
 import torch
 from PIL import Image
 from flask import Flask, jsonify, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from utils.labeling import label_csv2dict, resize_and_crop
 from utils.model import training_model
@@ -21,6 +23,13 @@ inference_types = ('single', 'team')
 gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
+
+# limiter
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["100 per day"]
+)
 
 # model settings
 class_index = label_csv2dict(args['label'])
@@ -59,6 +68,7 @@ def get_single_prediction(image_bytes):
 
 
 @app.route('/predict', methods=['GET', 'POST'])
+@limiter.limit("2/minute", override_defaults=False)
 def predict():
     if request.method == 'GET':
         return 'The model is up and running. Send a POST request'

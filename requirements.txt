@@ -8,3 +8,4 @@ onnx
 onnxruntime
 tqdm
 flask~=1.1.2
+Flask-Limiter
