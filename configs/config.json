@@ -1,0 +1,4 @@
+{
+  "arch": "shufflenetv2",
+  "label": "./dataset/label.csv"
+}

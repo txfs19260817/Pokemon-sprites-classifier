@@ -5,7 +5,8 @@ supported_models = [
     "alexnet",
     "mobilenetv2",
     "mobilenetv3",
-    "resnet18"
+    "resnet18",
+    "shufflenetv2"
 ]
 
 
@@ -18,6 +19,8 @@ def training_model(model_name, num_classes, pretrained=True):
         return mobilenetv3(num_classes, pretrained)
     if 'resnet' in model_name.lower():
         return resnet(num_classes, pretrained)
+    if 'shufflenetv2' in model_name.lower():
+        return shufflenetv2(num_classes, pretrained)
     raise ModuleNotFoundError("the model name: " + model_name + " is invalid")
 
 
@@ -42,4 +45,10 @@ def mobilenetv3(num_classes, pretrained=True):
 def resnet(num_classes, pretrained=True):
     net = models.resnet18(pretrained=pretrained)
     net.fc = nn.Linear(512, num_classes)
+    return net
+
+
+def shufflenetv2(num_classes, pretrained=True):
+    net = models.shufflenet_v2_x1_0(pretrained=pretrained)
+    net.fc = nn.Linear(1024, num_classes)
     return net

@@ -1,34 +1,32 @@
-import argparse
 import io
+import json
+import logging
 
 import torch
 from PIL import Image
 from flask import Flask, jsonify, request
 
 from utils.labeling import label_csv2dict, resize_and_crop
-from utils.model import supported_models, training_model
+from utils.model import training_model
 from utils.transformation import transform
 
-# args
-parser = argparse.ArgumentParser(description="Pokemon dot sprites classifier inference service")
-parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
-                    choices=supported_models,
-                    help='model architecture: ' +
-                         ' | '.join(supported_models) +
-                         ' (default: mobilenetv2)')
-parser.add_argument('-l', '--label', metavar='FILE', type=str, default='label.csv',
-                    help='path to label.csv')
-args = parser.parse_args()
+
+# load config
+with open('configs/config.json', 'r') as f:
+    args = json.load(f)
 
 # app settings
 app = Flask(__name__)
 inference_types = ('single', 'team')
+gunicorn_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers = gunicorn_logger.handlers
+app.logger.setLevel(gunicorn_logger.level)
 
 # model settings
-class_index = label_csv2dict(args.label)
+class_index = label_csv2dict(args['label'])
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-weight_path = args.arch + '.pth'
-model = training_model(args.arch, len(class_index), pretrained=False)
+weight_path = args['arch'] + '.pth'
+model = training_model(args['arch'], len(class_index), pretrained=False)
 model = model.to(device)
 model.load_state_dict(torch.load(weight_path, map_location=device))
 model.eval()
@@ -60,8 +58,10 @@ def get_single_prediction(image_bytes):
     return predicted_class
 
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
+    if request.method == 'GET':
+        return 'The model is up and running. Send a POST request'
     if request.method == 'POST':
         file, inference_type = request.files['file'], request.files['type']
         if inference_type not in inference_types:

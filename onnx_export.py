@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import onnx
 import onnxruntime
@@ -5,13 +7,13 @@ import torch
 import torch.onnx
 from PIL import Image
 
-from utils.model import training_model
+from utils.model import training_model, supported_models
 from utils.transformation import transform
 from utils.labeling import label_csv2dict
 
 
-def torch2onnx(model_name, image_path):
-    with open('label.csv', 'r') as f:
+def torch2onnx(model_name, image_path, label_path):
+    with open(label_path, 'r') as f:
         num_of_classes = len(f.readlines()) - 1
 
     device = torch.device('cpu')
@@ -40,10 +42,6 @@ def torch2onnx(model_name, image_path):
                       dynamic_axes={'input': {0: 'batch_size'},  # variable lenght axes
                                     'output': {0: 'batch_size'}})
 
-    check(onnx_path, x, torch_out, image_path)
-
-
-def check(onnx_path, x, torch_out, image_path):
     # check the ONNX model with ONNX’s API
     onnx_model = onnx.load(onnx_path)
     onnx.checker.check_model(onnx_model)
@@ -59,10 +57,7 @@ def check(onnx_path, x, torch_out, image_path):
     np.testing.assert_allclose(to_numpy(torch_out), ort_outs[0], rtol=1e-03, atol=1e-05)
 
     print("Exported model has been tested with ONNXRuntime, and the result looks good!")
-    run_onnx_model(ort_session, image_path)
 
-
-def run_onnx_model(ort_session, image_path):
     img = Image.open(image_path)
     img_y = transform['test'](img).unsqueeze(0)
 
@@ -70,7 +65,7 @@ def run_onnx_model(ort_session, image_path):
     ort_outs = ort_session.run(None, ort_inputs)
     output = ort_outs[0]
     prediction = np.argmax(output, 1)[0]
-    print("Prediction: ", prediction, label_csv2dict('label.csv')[prediction])
+    print("Prediction: ", prediction, label_csv2dict(label_path)[prediction])
 
 
 def to_numpy(tensor):
@@ -78,4 +73,15 @@ def to_numpy(tensor):
 
 
 if __name__ == '__main__':
-    torch2onnx('mobilenetv2', "dataset/train/amoonguss/amoonguss-1616210225.png")
+    parser = argparse.ArgumentParser(description='Export a PyTorch model to an ONNX model.')
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
+                        choices=supported_models,
+                        help='model architecture: ' +
+                             ' | '.join(supported_models) +
+                             ' (default: mobilenetv2)')
+    parser.add_argument('-i', '--image-path', metavar='DIR',
+                        help='path to an image for test', required=True)
+    parser.add_argument('-l', '--label-path', metavar='FILE', type=str, default='./dataset/label.csv',
+                        help='path to label.csv (default: ./dataset/label.csv)')
+    args = parser.parse_args()
+    torch2onnx(args.arch, args.image_path, args.label_path)

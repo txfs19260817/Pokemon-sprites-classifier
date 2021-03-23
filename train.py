@@ -62,7 +62,7 @@ def train(args):
 
     torch.save(model.state_dict(), weight_path)
     print('Finished training, and weight was saved in ' + weight_path)
-    generate_label_csv(classes)
+    generate_label_csv(args.csv_path, classes)
     print('Generated label.csv')
 
 
@@ -104,5 +104,7 @@ if __name__ == '__main__':
                         help='model architecture: ' +
                              ' | '.join(supported_models) +
                              ' (default: mobilenetv2)')
+    parser.add_argument('-c', '--csv-path', metavar='FILE',
+                        help='label.csv saving path (default: ./dataset/label.csv)', default="./dataset/label.csv")
     args = parser.parse_args()
     train(args)

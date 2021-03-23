@@ -48,7 +48,6 @@ if __name__ == '__main__':
     test(args)
 
 # filenames = [
-#     'dataset/train/amoonguss/amoonguss-1616210225.png',
 #     'dataset/train/incineroar/incineroar-1616205113.png',
 #     'dataset/train/zacian/zacian-1616210152.png',
 # ]
