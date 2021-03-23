@@ -20,6 +20,8 @@ with open('configs/config.json', 'r') as f:
 # app settings
 app = Flask(__name__)
 inference_types = ('single', 'team')
+
+# log settings
 gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
@@ -51,7 +53,6 @@ def get_team_preview_prediction(image_bytes):
         outputs = model(tensor)
     _, predicted_indices = torch.max(outputs.data, 1)
     predicted_classes = [class_index[i.item()] for i in predicted_indices]
-    app.logger.info('Result: ' + ' '.join(predicted_classes))
     return predicted_classes
 
 
@@ -63,7 +64,6 @@ def get_single_prediction(image_bytes):
         output = model(tensor)
     _, predicted_idx = torch.max(output.data, 1)
     predicted_class = class_index[predicted_idx.item()]
-    app.logger.info('Result: ' + predicted_class)
     return predicted_class
 
 
@@ -71,6 +71,7 @@ def get_single_prediction(image_bytes):
 @limiter.limit("2/minute", override_defaults=False)
 def predict():
     if request.method == 'GET':
+        app.logger.warning('/predict is visited in GET method')
         return 'The model is up and running. Send a POST request'
     if request.method == 'POST':
         file, inference_type = request.files['file'], request.files['type']
@@ -79,9 +80,11 @@ def predict():
         img_bytes = file.read()
         if inference_type == 'single':
             class_name = get_single_prediction(image_bytes=img_bytes)
+            app.logger.info('Result: ' + class_name)
             return jsonify({'name': class_name})
         if inference_type == 'team':
             classes_name = get_team_preview_prediction(image_bytes=img_bytes)
+            app.logger.info('Result: ' + ' '.join(classes_name))
             return jsonify({'names': classes_name})
 
 
