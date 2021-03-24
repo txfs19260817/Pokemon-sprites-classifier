@@ -140,6 +140,7 @@ cython_debug/
 # customized
 .idea
 .vscode
+*.pem
 *.pt
 *.pth
 *.onnx

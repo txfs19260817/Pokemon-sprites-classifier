@@ -1,3 +1,4 @@
+import argparse
 import io
 import json
 import logging
@@ -67,7 +68,7 @@ def get_single_prediction(image_bytes):
     return predicted_class
 
 
-@app.route('/predict', methods=['GET', 'POST'])
+@app.route('/advapi/predict', methods=['GET', 'POST'])
 @limiter.limit("2/minute", override_defaults=False)
 def predict():
     if request.method == 'GET':
@@ -89,4 +90,10 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
+    console_args = parser.parse_args()
+    if console_args.debug:
+        app.run(debug=console_args.debug)
+    else:
+        app.run(ssl_context=(args.ssl.certfile, args.ssl.keyfile))

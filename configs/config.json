@@ -1,4 +1,8 @@
 {
   "arch": "shufflenetv2",
-  "label": "./dataset/label.csv"
+  "label": "./dataset/label.csv",
+  "ssl": {
+    "certfile": "fullchain.pem",
+    "keyfile": "privkey.pem"
+  }
 }
