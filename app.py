@@ -6,6 +6,7 @@ import logging
 import torch
 from PIL import Image
 from flask import Flask, jsonify, request
+from flask_cors import *
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -20,6 +21,7 @@ with open('configs/config.json', 'r') as f:
 
 # app settings
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 inference_types = ('single', 'team')
 
 # log settings
@@ -75,10 +77,10 @@ def predict():
         app.logger.warning('/predict is visited in GET method')
         return 'The model is up and running. Send a POST request'
     if request.method == 'POST':
-        file, inference_type = request.files['file'], request.files['type']
+        f, inference_type = request.files['file'], request.values['type']
         if inference_type not in inference_types:
             inference_type = 'team'
-        img_bytes = file.read()
+        img_bytes = f.read()
         if inference_type == 'single':
             class_name = get_single_prediction(image_bytes=img_bytes)
             app.logger.info('Result: ' + class_name)
