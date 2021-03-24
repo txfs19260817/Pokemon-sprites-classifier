@@ -12,19 +12,32 @@ from utils.transformation import transform
 from utils.labeling import label_csv2dict
 
 
-def torch2onnx(model_name, image_path, label_path):
-    with open(label_path, 'r') as f:
-        num_of_classes = len(f.readlines()) - 1
+def get_model(model_name, label_path):
+    label_dict = label_csv2dict(label_path)
+    num_of_classes = len(label_dict)
 
     device = torch.device('cpu')
     weight_path = model_name + '.pth'
-    onnx_path = model_name + '.onnx'
 
     # Load pretrained model weights and set the model to inference mode
     model = training_model(model_name, num_of_classes, pretrained=False)
     model = model.to(device)
     model.load_state_dict(torch.load(weight_path, map_location=device))
     model.eval()
+
+    return model, label_dict
+
+
+def torch2torch_script(model, model_name):
+    torch_script_path = model_name + '.pt'
+    example = torch.rand(1, 3, 224, 224)
+    traced_script_module = torch.jit.trace(model, example)
+    traced_script_module.save(torch_script_path)
+    print('a Torch Script has been exported to: ' + torch_script_path)
+
+
+def torch2onnx(model, model_name, image_path, label_dict):
+    onnx_path = model_name + '.onnx'
 
     # Input to the model
     x = torch.randn(1, 3, 224, 224, requires_grad=True)
@@ -41,6 +54,7 @@ def torch2onnx(model_name, image_path, label_path):
                       output_names=['output'],  # the model's output names
                       dynamic_axes={'input': {0: 'batch_size'},  # variable lenght axes
                                     'output': {0: 'batch_size'}})
+    print('an ONNX model has been exported to: ' + onnx_path)
 
     # check the ONNX model with ONNX’s API
     onnx_model = onnx.load(onnx_path)
@@ -65,7 +79,7 @@ def torch2onnx(model_name, image_path, label_path):
     ort_outs = ort_session.run(None, ort_inputs)
     output = ort_outs[0]
     prediction = np.argmax(output, 1)[0]
-    print("Prediction: ", prediction, label_csv2dict(label_path)[prediction])
+    print("Prediction: ", prediction, label_dict[prediction])
 
 
 def to_numpy(tensor):
@@ -73,15 +87,23 @@ def to_numpy(tensor):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Export a PyTorch model to an ONNX model.')
-    parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
+    parser = argparse.ArgumentParser(description='Export a PyTorch model to an ONNX model or a Torch Script.')
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='shufflenetv2',
                         choices=supported_models,
                         help='model architecture: ' +
                              ' | '.join(supported_models) +
-                             ' (default: mobilenetv2)')
-    parser.add_argument('-i', '--image-path', metavar='DIR',
-                        help='path to an image for test', required=True)
+                             ' (default: shufflenetv2)')
+    parser.add_argument('-i', '--image-path', metavar='DIR', type=str,
+                        help='path to an image for test (required by ONNX export)')
     parser.add_argument('-l', '--label-path', metavar='FILE', type=str, default='./dataset/label.csv',
                         help='path to label.csv (default: ./dataset/label.csv)')
+    parser.add_argument('-t', '--type', type=str, default='torchscript',
+                        choices=['onnx', 'torchscript'], help='choose which format to convert (default: torchscript)')
     args = parser.parse_args()
-    torch2onnx(args.arch, args.image_path, args.label_path)
+    
+    model, label_dict = get_model(args.arch, args.label_path)
+    if args.type == 'onnx':
+        assert isinstance(args.image_path, str) and len(args.image_path) > 0, "an image is required for ONNX model exporting"
+        torch2onnx(model, args.arch, args.image_path, label_dict)
+    elif args.type == 'torchscript':
+        torch2torch_script(model, args.arch)
