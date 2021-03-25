@@ -18,9 +18,11 @@ def train(args):
     trainloader = torch.utils.data.DataLoader(trainset, args.batch_size, shuffle=True, num_workers=args.num_workers)
     valloader = torch.utils.data.DataLoader(valset, 1, shuffle=False, num_workers=1)
 
+    assert trainset.classes == valset.classes
     classes = trainset.classes
     iters = len(trainloader)
     max_acc = 0
+    print("the number of classes: ", len(classes))
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     weight_path = args.arch + '.pth'
@@ -67,7 +69,7 @@ def train(args):
 
 
 def validation(testloader, model, device, classes):
-    print('\nStart validation on the training set')
+    print('\nStart validation on the validation set')
     model.eval()
     correct = 0
     total = 0
@@ -88,22 +90,22 @@ def validation(testloader, model, device, classes):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train a Pokemon species classifier.')
+    parser = argparse.ArgumentParser(description='Train a Pokemon species classifier in PyTorch.')
     parser.add_argument('-d', '--dataset-root-path', metavar='DIR',
                         help='root path to dataset (default: ./dataset)', default="dataset")
     parser.add_argument('-b', '--batch-size', type=int, default=32, metavar='N',
                         help='input batch size for training (default: 32)')
-    parser.add_argument('-e', '--epochs', type=int, default=1000, metavar='N',
-                        help='number of epochs to train (default: 1000)')
+    parser.add_argument('-e', '--epochs', type=int, default=300, metavar='N',
+                        help='number of epochs to train (default: 300)')
     parser.add_argument('-j', '--num-workers', type=int, default=2, metavar='N',
                         help='number of workers to sample data (default: 2)')
-    parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
-                        metavar='LR', help='initial learning rate (default: 0.0001)', dest='lr')
-    parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
+    parser.add_argument('-lr', '--learning-rate', default=0.001, type=float,
+                        metavar='LR', help='initial learning rate (default: 0.001)', dest='lr')
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='shufflenetv2',
                         choices=supported_models,
                         help='model architecture: ' +
                              ' | '.join(supported_models) +
-                             ' (default: mobilenetv2)')
+                             ' (default: shufflenetv2)')
     parser.add_argument('-c', '--csv-path', metavar='FILE',
                         help='label.csv saving path (default: ./dataset/label.csv)', default="./dataset/label.csv")
     args = parser.parse_args()

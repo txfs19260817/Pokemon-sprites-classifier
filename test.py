@@ -39,11 +39,11 @@ if __name__ == '__main__':
                         help='images to be tested')
     parser.add_argument('-d', '--dataset-root-path', metavar='DIR',
                         help='root path to dataset (default: ./dataset)', default="dataset")
-    parser.add_argument('-a', '--arch', metavar='ARCH', default='mobilenetv2',
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='shufflenetv2',
                         choices=supported_models,
                         help='model architecture: ' +
                              ' | '.join(supported_models) +
-                             ' (default: mobilenetv2)')
+                             ' (default: shufflenetv2)')
     args = parser.parse_args()
     test(args)
 
