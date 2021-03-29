@@ -15,7 +15,7 @@ A PyTorch implemented Pokémon dot sprites classifier.
 ├── requirements.txt  # Python package requirements
 ├── test.py  # Single image test script
 ├── train.py  # Model training script
-└── utils  # a Python package providing helper functions
+└── utils  # A Python package providing helper functions
 ```
 
 ## Requirements
@@ -113,8 +113,8 @@ Labeling procedures:
 ## Docker
 A Dockerfile is prepared for deploying inference service with gunicorn. Please check `configs` for configuration.
 ```shell
-docker build -t $TAG --build-arg PORT=$PORT
-docker run -it -p $PORT:$PORT -v $CERT_PATH:$CERT_PATH txfs19260817/pokemon-sprite-classifier
+docker build -t $TAG --build-arg PORT=$PORT --build-arg CERT_PATH=$CERT_PATH
+docker run -it -p $PORT:$PORT -v $CERT_PATH:$CERT_PATH $TAG
 ```
 
 ## Roadmap
