@@ -30,22 +30,23 @@ pip install -r requirements.txt
 ### Train
 Run `python train.py -h` for help.
 ```text
-usage: train.py [-h] [-d DIR] [-b N] [-e N] [-w N] [--lr LR] [-a ARCH]
+usage: train.py [-h] [-d DIR] [-b N] [-e N] [-j N] [-lr LR] [-a ARCH] [-c FILE]
 
-Train a Pokemon species classifier.
+Train a Pokemon species classifier in PyTorch.
 
 optional arguments:
   -h, --help            show this help message and exit
   -d DIR, --dataset-root-path DIR
                         root path to dataset (default: ./dataset)
   -b N, --batch-size N  input batch size for training (default: 32)
-  -e N, --epochs N      number of epochs to train (default: 200)
+  -e N, --epochs N      number of epochs to train (default: 300)
   -j N, --num-workers N
                         number of workers to sample data (default: 2)
-  --lr LR, --learning-rate LR
-                        initial learning rate (default: 0.0001)
-  -a ARCH, --arch ARCH  model architecture: alexnet | mobilenetv2 | resnet18
-                        (default: mobilenetv2)
+  -lr LR, --learning-rate LR
+                        initial learning rate (default: 0.001)
+  -a ARCH, --arch ARCH  model architecture: alexnet | mobilenetv2 | mobilenetv3 | resnet18 | shufflenetv2 (default: shufflenetv2)
+  -c FILE, --csv-path FILE
+                        label.csv saving path (default: ./dataset/label.csv)
 ```
 ### Test
 Run `python test.py -h` for help.
@@ -61,12 +62,17 @@ optional arguments:
   -h, --help            show this help message and exit
   -d DIR, --dataset-root-path DIR
                         root path to dataset (default: ./dataset)
-  -a ARCH, --arch ARCH  model architecture: alexnet | mobilenetv2 | resnet18
-                        (default: mobilenetv2)
+  -a ARCH, --arch ARCH  model architecture: alexnet | mobilenetv2 | mobilenetv3 | resnet18 | shufflenetv2 (default: shufflenetv2)
 ```
 Example:
 ```shell
 python test.py 1.png 2.png 3.png
+```
+
+### Server
+Example:
+```shell
+python app.py -d
 ```
 
 ## Supported Species
@@ -106,6 +112,10 @@ Labeling procedures:
 
 ## Docker
 A Dockerfile is prepared for deploying inference service with gunicorn. Please check `configs` for configuration.
+```shell
+docker build -t $TAG --build-arg PORT=$PORT
+docker run -it -p $PORT:$PORT -v $CERT_PATH:$CERT_PATH txfs19260817/pokemon-sprite-classifier
+```
 
 ## Roadmap
 - [x] Release a labeling tool

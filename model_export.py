@@ -97,8 +97,8 @@ if __name__ == '__main__':
                         help='path to an image for test (required by ONNX export)')
     parser.add_argument('-l', '--label-path', metavar='FILE', type=str, default='./dataset/label.csv',
                         help='path to label.csv (default: ./dataset/label.csv)')
-    parser.add_argument('-t', '--type', type=str, default='torchscript',
-                        choices=['onnx', 'torchscript'], help='choose which format to convert (default: torchscript)')
+    parser.add_argument('-t', '--type', type=str, default='onnx',
+                        choices=['onnx', 'torchscript'], help='choose which format to convert (default: onnx)')
     args = parser.parse_args()
     
     model, label_dict = get_model(args.arch, args.label_path)
