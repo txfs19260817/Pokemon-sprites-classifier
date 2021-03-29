@@ -1,5 +1,5 @@
 {
-  "arch": "shufflenetv2",
+  "arch": "shufflenetv2small",
   "label": "./dataset/label.csv",
   "ssl": {
     "certfile": "fullchain.pem",

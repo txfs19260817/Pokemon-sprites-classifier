@@ -6,7 +6,8 @@ supported_models = [
     "mobilenetv2",
     "mobilenetv3",
     "resnet18",
-    "shufflenetv2"
+    "shufflenetv2",
+    "shufflenetv2small"
 ]
 
 
@@ -20,7 +21,8 @@ def training_model(model_name, num_classes, pretrained=True):
     if 'resnet' in model_name.lower():
         return resnet(num_classes, pretrained)
     if 'shufflenetv2' in model_name.lower():
-        return shufflenetv2(num_classes, pretrained)
+        small = True if 'small' in model_name.lower() else False
+        return shufflenetv2(num_classes, pretrained, small)
     raise ModuleNotFoundError("the model name: " + model_name + " is invalid")
 
 
@@ -48,7 +50,7 @@ def resnet(num_classes, pretrained=True):
     return net
 
 
-def shufflenetv2(num_classes, pretrained=True):
-    net = models.shufflenet_v2_x1_0(pretrained=pretrained)
+def shufflenetv2(num_classes, pretrained=True, small=False):
+    net = models.shufflenet_v2_x0_5(pretrained) if small else models.shufflenet_v2_x1_0(pretrained)
     net.fc = nn.Linear(1024, num_classes)
     return net

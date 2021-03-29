@@ -83,11 +83,11 @@ def predict():
         img_bytes = f.read()
         if inference_type == 'single':
             class_name = get_single_prediction(image_bytes=img_bytes)
-            app.logger.info('Result: ' + class_name)
+            app.logger.info('[Result] ' + class_name)
             return jsonify({'name': class_name})
         if inference_type == 'team':
             classes_name = get_team_preview_prediction(image_bytes=img_bytes)
-            app.logger.info('Result: ' + ' '.join(classes_name))
+            app.logger.info('[Result] ' + ' '.join(classes_name))
             return jsonify({'names': classes_name})
 
 
