@@ -144,3 +144,5 @@ cython_debug/
 *.pt
 *.pth
 *.onnx
+dist/
+out/

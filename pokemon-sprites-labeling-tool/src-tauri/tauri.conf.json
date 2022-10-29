@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "pokemon-sprites-labeling-tool",
-    "version": "0.0.0"
+    "productName": "Pokemon Sprites Labeling Tool",
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -40,7 +40,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.github.txfs19260817",
       "longDescription": "",
       "macOS": {
         "entitlements": null,

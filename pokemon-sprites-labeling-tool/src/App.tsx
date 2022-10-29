@@ -1,15 +1,20 @@
-import { ChangeEvent, useState } from "react";
 import * as Jimp from "jimp/browser/lib/jimp";
+import { ChangeEvent, useMemo, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+
+import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
-import { invoke } from "@tauri-apps/api";
-import { dex } from "./utils/pkmn";
-import Autocomplete from "@mui/material/Autocomplete";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import { Icons } from "@pkmn/img";
+import { invoke } from "@tauri-apps/api";
 
-const speciesId = Array.from(dex.species).map((s) => s.id);
+import { getDex } from "./utils/pkmn";
 
 const cropProperties = {
   resizedW: 1280,
@@ -81,16 +86,18 @@ const resizeAndCrop = async (image: Jimp): Promise<string[]> => {
 
 function SpeciesAutocomplete({
   value,
+  speciesIds,
   onChange,
 }: {
   value: string;
+  speciesIds: string[];
   onChange: (event: ChangeEvent<{}>, newValue: string | null) => void;
 }) {
   return (
     <Autocomplete
       value={value}
       onChange={onChange}
-      options={speciesId}
+      options={speciesIds}
       renderInput={(params) => <TextField {...params} label="Species" />}
       renderOption={(props, option) => (
         <li {...props}>
@@ -105,9 +112,47 @@ function SpeciesAutocomplete({
   );
 }
 
+function GenSelect({
+  genNumber,
+  setGenNumber,
+}: {
+  genNumber: number;
+  setGenNumber: (genNumber: number) => void;
+}) {
+  const handleChange = (event: SelectChangeEvent) => {
+    setGenNumber(+event.target.value);
+  };
+
+  return (
+    <FormControl sx={{ m: 1, minWidth: 80 }}>
+      <InputLabel id="gen-select-label">Gen</InputLabel>
+      <Select
+        labelId="gen-select-label"
+        id="gen-select"
+        value={genNumber.toString()}
+        label="Gen"
+        autoWidth
+        onChange={handleChange}
+      >
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((g) => (
+          <MenuItem key={g} value={g}>
+            {g}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
 function App() {
   const [croppedImages, setCroppedImages] = useState<string[]>([]);
   const [species, setSpecies] = useState<string[]>([]);
+  const [genNumber, setGenNumber] = useState<number>(8);
+
+  const speciesIds = useMemo(
+    () => Array.from(getDex(genNumber).species).map((s) => s.id),
+    [genNumber]
+  );
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
@@ -129,13 +174,15 @@ function App() {
   };
 
   const handleSave = async () => {
-    const message = await invoke("write_images", {
+    const promise = invoke("write_images", {
       base64Images: croppedImages,
-      paths: species.map(
-        (s) => `./out/${s}/${Math.floor(Math.random() * 10000000)}.png`
-      ),
+      paths: species.map((s) => `./out/${s}/${+new Date()}.png`),
     });
-    alert(message);
+    toast.promise(promise, {
+      loading: "Saving...",
+      success: "Saved!",
+      error: "Error on saving",
+    });
   };
 
   return (
@@ -151,6 +198,7 @@ function App() {
             <img src={image} alt={`cropped image ${i}`} key={i} />
             <SpeciesAutocomplete
               value={species[i]}
+              speciesIds={speciesIds}
               onChange={(_, v) => {
                 species[i] = v as string;
                 setSpecies([...species]);
@@ -178,7 +226,9 @@ function App() {
         >
           Save
         </Button>
+        <GenSelect genNumber={genNumber} setGenNumber={setGenNumber} />
       </Grid>
+      <Toaster />
     </Container>
   );
 }

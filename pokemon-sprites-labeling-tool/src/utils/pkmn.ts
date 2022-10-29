@@ -22,6 +22,16 @@ const NATDEX_EXISTS = (d: Data) => {
     !d.zMove && !d.itemUser && !d.forcedForme);
 };
 
+const LEGALITY_FILTER = (d: Data) => {
+    if (!d.exists) return false;
+    if (d.kind === 'Ability' && d.id === 'noability') return false;
+    if ('isNonstandard' in d && d.isNonstandard) return false;
+    if (d.kind === 'Species' && NATDEX_UNOBTAINABLE_SPECIES.includes(d.name)) return false;
+    return !(d.kind === 'Item' && ['Past', 'Unobtainable'].includes(d.isNonstandard!) &&
+    !d.zMove && !d.itemUser && !d.forcedForme);
+};
+
 const gens = new Generations(Dex, NATDEX_EXISTS);
 
-export const dex = gens.get(8);
+export const getDex = (gen: number) => gens.get(gen);
+export const getLegalDex = () => new Generations(Dex, LEGALITY_FILTER).get(8);
